@@ -16,7 +16,7 @@ If country is not given, default country is "nl".
 Create ``${HOME}/.config/nordvpn-auth.txt`` with two lines. 
 First line is user name, second is password.
 
-## Requirements
+## Dependency list
 
 - wc
 - wget
