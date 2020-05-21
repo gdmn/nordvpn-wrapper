@@ -1,11 +1,11 @@
-# NordVPN wrappeR
+# NordVPN wrapper
 
 It connects to the fastest server in given country.
 
 Based on tutorial: https://nordvpn.com/tutorials/linux/openvpn/
 and code from: https://github.com/Joentje/nordvpn-proxy
 
-# Usage:
+# Usage
 
     nordvpn-wrapper.sh country
 

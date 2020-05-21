@@ -61,16 +61,16 @@ countries='/tmp/nordvpn-countries.json'
 if [ ! -f "$countries" ]; then
     wget 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_countries' -O "$countries"
 fi
-export country_code=$(cat $countries | jq '.[]  | select(.code == "'${country^^}'") | .id')
+country_code=$(cat $countries | jq '.[]  | select(.code == "'${country^^}'") | .id')
 echo "Selected country: $country -> $country_code"
 
 trecomendations=$(mktemp)
 wget --quiet --header 'cache-control: no-cache' --output-document=$trecomendations 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&filters={%22country_id%22:'$country_code'}'
-export host_name="$(jq -r '.[0].hostname' $trecomendations)"
-export host_description="$(jq -r '.[0].name' $trecomendations)"
-export host_load="$(jq -r '.[0].load' $trecomendations)"
-export recommendation_updated_at="$(jq -r '.[0].updated_at' $trecomendations)"
-export host_ip="$(jq -r '.[0].station' $trecomendations)"
+host_name="$(jq -r '.[0].hostname' $trecomendations)"
+host_description="$(jq -r '.[0].name' $trecomendations)"
+host_load="$(jq -r '.[0].load' $trecomendations)"
+recommendation_updated_at="$(jq -r '.[0].updated_at' $trecomendations)"
+host_ip="$(jq -r '.[0].station' $trecomendations)"
 echo "Connecting to: $host_name $host_ip ($host_description)"
 echo "               because at $recommendation_updated_at load was only ${host_load}%"
 echo ''
