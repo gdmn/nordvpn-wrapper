@@ -4,15 +4,19 @@ set -e
 
 help() {
 cat <<EOF
-NordVPN wrapper. It connects to the fastest server in given country.
+NordVPN wrapper. It connects to the recommended server in given country.
+Source code: https://github.com/gdmn/nordvpn-wrapper.
 
 Based on tutorial: https://nordvpn.com/tutorials/linux/openvpn/
-and code from: https://github.com/Joentje/nordvpn-proxy
+and code from: https://github.com/Joentje/nordvpn-proxy.
+
+The most complete NordVPN API documentation:
+https://blog.sleeplessbeastie.eu/2019/02/18/how-to-use-public-nordvpn-api/.
 
 Usage:
 	`basename $0` country
 
-If country is not given, default country is "nl".
+If country is not given, default country is "NL".
 EOF
 }
 
@@ -52,8 +56,7 @@ if pidof openvpn > /dev/null 2>&1; then
         current_host_ip=$( echo "$current_state" | jq -r '.["ip"]' )
         current_host_country=$( echo "$current_state" | jq -r '.["country"]' )
         current_host_country_code=$( echo "$current_state" | jq -r '.["code"]' )
-        echo "You are currently connected to $current_host_ip in $current_host_country [$current_host_country_code]"
-        exit 3
+        fail "You are currently connected to $current_host_ip in $current_host_country [$current_host_country_code]"
     fi
 fi
 
@@ -64,12 +67,17 @@ if [ ! -f "$ovpn_zip" ]; then
 fi
 
 # get country code
-country="${1:-nl}"
+country="${1:-NL}"
 countries='/tmp/nordvpn-countries.json'
 if [ ! -f "$countries" ]; then
     wget 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_countries' -O "$countries"
 fi
 country_code=$(cat $countries | jq '.[]  | select(.code == "'${country^^}'") | .id')
+if [ -z "$country_code" ]; then
+    echo "Given country \"$country\" can not be found! Country can be any of:"
+    cat $countries | jq --raw-output '.[] | [.code, .name, .id] | "  \(.[0]): \(.[1]) -> \(.[2]) "'
+    fail ""
+fi
 echo "Selected country: $country -> $country_code"
 
 # choose best server

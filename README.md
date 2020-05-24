@@ -1,19 +1,22 @@
 # NordVPN wrapper
 
-It connects to the fastest server in given country.
+It connects to recommended server in given country.
 
 Based on tutorial: https://nordvpn.com/tutorials/linux/openvpn/
-and code from: https://github.com/Joentje/nordvpn-proxy
+and code from: https://github.com/Joentje/nordvpn-proxy.
+
+The most complete NordVPN API documentation:
+https://blog.sleeplessbeastie.eu/2019/02/18/how-to-use-public-nordvpn-api/.
 
 ## Usage
 
     nordvpn-wrapper.sh country
 
-If country is not given, default country is "nl".
+If country is not given, default country is "NL".
 
 ## Configuration
 
-Create ``${HOME}/.config/nordvpn-auth.txt`` with two lines. 
+Create ``${HOME}/.config/nordvpn-auth.txt`` with two lines.
 First line is user name, second is password.
 
 ## Dependency list
