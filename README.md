@@ -42,3 +42,10 @@ First line is user name, second is password.
 
     curl -s 'https://raw.githubusercontent.com/gdmn/nordvpn-wrapper/master/nordvpn-wrapper.sh' -o /tmp/nordvpn-wrapper.sh && bash /tmp/nordvpn-wrapper.sh
 
+## Connection guard (optional)
+
+The script runs nordvpn-wrapper.sh and guards openvpn connection.
+If openvpn process is not present or ping fails, connection is restarted.
+
+	curl -s 'https://raw.githubusercontent.com/gdmn/nordvpn-wrapper/master/nordvpn-guard.sh' -o /tmp/nordvpn-guard.sh && sudo bash /tmp/nordvpn-guard.sh
+
