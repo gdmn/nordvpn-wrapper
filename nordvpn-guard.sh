@@ -18,7 +18,7 @@ command -v openvpn >/dev/null 2>&1 || { echo >&2 "openvpn is not installed."; ex
 command -v sudo >/dev/null 2>&1 || { echo >&2 "sudo is not installed."; exit 1; }
 
 show_ip() {
-	dig +short myip.opendns.com @resolver1.opendns.com
+	dig +timeout=1 +short myip.opendns.com @resolver1.opendns.com
 }
 
 vpn_start() {
@@ -33,7 +33,7 @@ vpn_start() {
 
 vpn_stop() {
 	echo 'VPN stop'
-	while pidof openvpn; do
+	while pidof openvpn>/dev/null; do
 		for p in $( pidof openvpn ); do
 			echo "kill openvpn process $p"
 			kill $p
@@ -53,12 +53,12 @@ vpn_check() {
 		vpn_start
 		sleep 20
 	fi
-	if (! ip a s tun0 up>/dev/null 2>&1); then
+	if (! ip a s tun0 up>/dev/null 2>&1 ); then
 		echo "tun0 is not up"
 		vpn_restart
 		sleep 20
 	fi
-	if (! ping -W 1 -c 5 1.1.1.1 2>/dev/null 1>&2); then
+	if (! ping -W 1 -c 5 1.1.1.1 2>/dev/null 1>&2 ); then
 		echo "ping failed"
 		vpn_restart
 		sleep 20
