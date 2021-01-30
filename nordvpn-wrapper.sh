@@ -66,13 +66,12 @@ fi
 
 host_name=''
 ovpn_zip='/tmp/nordvpn-ovpn.zip'
+# download server list
+if [ ! -f "$ovpn_zip" ]; then
+    wget 'https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip' -O "$ovpn_zip"
+fi
 
 if [ -z $2 ]; then
-    # download server list
-    if [ ! -f "$ovpn_zip" ]; then
-        wget 'https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip' -O "$ovpn_zip"
-    fi
-
     # get country code
     country="${1:-NL}"
     countries='/tmp/nordvpn-countries.json'
