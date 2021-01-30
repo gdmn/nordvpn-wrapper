@@ -14,6 +14,16 @@ https://blog.sleeplessbeastie.eu/2019/02/18/how-to-use-public-nordvpn-api/.
 
 If country is not given, default country is "NL".
 
+## Alternative usage
+
+If for some reason connection to automatically selected server is not desired, server number can be specified as the second argument:
+
+    nordvpn-wrapper.sh country serverNumber
+
+E.g.
+
+    nordvpn-wrapper.sh nl 934
+
 ## Configuration
 
 Create ``${HOME}/.config/nordvpn-auth.txt`` with two lines.

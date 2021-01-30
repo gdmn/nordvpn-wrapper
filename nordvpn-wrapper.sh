@@ -16,6 +16,10 @@ https://blog.sleeplessbeastie.eu/2019/02/18/how-to-use-public-nordvpn-api/.
 Usage:
 	`basename $0` country
 
+or:
+
+	`basename $0` country serverNumber
+
 If country is not given, default country is "NL".
 EOF
 }
@@ -60,42 +64,52 @@ if pidof openvpn > /dev/null 2>&1; then
     fi
 fi
 
-# download server list
+host_name=''
 ovpn_zip='/tmp/nordvpn-ovpn.zip'
-if [ ! -f "$ovpn_zip" ]; then
-    wget 'https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip' -O "$ovpn_zip"
-fi
 
-# get country code
-country="${1:-NL}"
-countries='/tmp/nordvpn-countries.json'
-if [ ! -f "$countries" ]; then
-    wget 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_countries' -O "$countries"
-fi
-country_code=$(cat $countries | jq '.[]  | select(.code == "'${country^^}'") | .id')
-if [ -z "$country_code" ]; then
-    echo "Given country \"$country\" can not be found! Country can be any of:"
-    cat $countries | jq --raw-output '.[] | [.code, .name, .id] | "  \(.[0]): \(.[1]) -> \(.[2]) "'
-    fail ""
-fi
-echo "Selected country: $country -> $country_code"
+if [ -z $2 ]; then
+    # download server list
+    if [ ! -f "$ovpn_zip" ]; then
+        wget 'https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip' -O "$ovpn_zip"
+    fi
 
-# choose best server
-trecomendations=$(mktemp)
-wget --quiet --header 'cache-control: no-cache' --output-document=$trecomendations 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&filters={%22country_id%22:'$country_code'}'
-host_name="$(jq -r '.[0].hostname' $trecomendations)"
-host_description="$(jq -r '.[0].name' $trecomendations)"
-host_load="$(jq -r '.[0].load' $trecomendations)"
-recommendation_updated_at="$(jq -r '.[0].updated_at' $trecomendations)"
-host_ip="$(jq -r '.[0].station' $trecomendations)"
-echo "Connecting to: $host_name $host_ip ($host_description)"
-echo "               because at $recommendation_updated_at load was only ${host_load}%"
-echo ''
-rm "$trecomendations"
+    # get country code
+    country="${1:-NL}"
+    countries='/tmp/nordvpn-countries.json'
+    if [ ! -f "$countries" ]; then
+        wget 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_countries' -O "$countries"
+    fi
+    country_code=$(cat $countries | jq '.[]  | select(.code == "'${country^^}'") | .id')
+    if [ -z "$country_code" ]; then
+        echo "Given country \"$country\" can not be found! Country can be any of:"
+        cat $countries | jq --raw-output '.[] | [.code, .name, .id] | "  \(.[0]): \(.[1]) -> \(.[2]) "'
+        fail ""
+    fi
+    echo "Selected country: $country -> $country_code"
+
+    # choose best server
+    trecomendations=$(mktemp)
+    wget --quiet --header 'cache-control: no-cache' --output-document=$trecomendations 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&filters={%22country_id%22:'$country_code'}'
+    host_name="$(jq -r '.[0].hostname' $trecomendations)"
+    host_description="$(jq -r '.[0].name' $trecomendations)"
+    host_load="$(jq -r '.[0].load' $trecomendations)"
+    recommendation_updated_at="$(jq -r '.[0].updated_at' $trecomendations)"
+    host_ip="$(jq -r '.[0].station' $trecomendations)"
+    echo "Connecting to: $host_name $host_ip ($host_description)"
+    echo "               because at $recommendation_updated_at load was only ${host_load}%"
+    echo ''
+    rm "$trecomendations"
+else
+    country="$1"
+    serverId="$2"
+    host_name="${country}${serverId}"
+    echo "Connecting to: $host_name"
+    echo ''
+fi
 
 # prepare ovpn configuration file for selected server
 tdir=$(mktemp -d)
-vpn_config=$(unzip -l "$ovpn_zip" "*$protocol.ovpn" | sed -E 's/.* //g' | grep -E '.*/[a-z]+[0-9]+.*ovpn' | grep "$host_name" | sort -R | head -n 1)
+vpn_config=$(unzip -l "$ovpn_zip" "*$protocol.ovpn" | sed -E 's/.* //g' | grep -E '.*/[a-z]+[0-9]+.*ovpn' | grep -i "$host_name" | sort -R | head -n 1)
 echo "Extracting file: $vpn_config"
 unzip -o "$ovpn_zip" "$vpn_config" -d "$tdir/"
 echo "auth-user-pass $auth_file" >> "$tdir/$vpn_config"
