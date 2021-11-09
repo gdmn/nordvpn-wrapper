@@ -108,7 +108,7 @@ fi
 
 # prepare ovpn configuration file for selected server
 tdir=$(mktemp -d)
-vpn_config=$(unzip -l "$ovpn_zip" "*$protocol.ovpn" | sed -E 's/.* //g' | grep -E '.*/[a-z]+[0-9]+.*ovpn' | grep -i "$host_name" | sort -R | head -n 1)
+vpn_config=$(unzip -l "$ovpn_zip" "*/*$protocol.ovpn" | sed -E 's/.* //g' | grep -E '.*/[a-z]+[0-9]+.*ovpn' | grep -i "$host_name" | sort -R | head -n 1)
 echo "Extracting file: $vpn_config"
 unzip -o "$ovpn_zip" "$vpn_config" -d "$tdir/"
 echo "auth-user-pass $auth_file" >> "$tdir/$vpn_config"
