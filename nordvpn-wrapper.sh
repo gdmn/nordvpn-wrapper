@@ -40,7 +40,7 @@ protocol='udp'
 
 # check dependencies
 command -v wc >/dev/null 2>&1  || { echo >&2 "wc is not installed."; exit 1; }
-command -v wget >/dev/null 2>&1  || { echo >&2 "wget is not installed."; exit 1; }
+command -v curl >/dev/null 2>&1  || { echo >&2 "curl is not installed."; exit 1; }
 command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip is not installed."; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo >&2 "jq is not installed."; exit 1; }
 command -v openvpn >/dev/null 2>&1 || { echo >&2 "openvpn is not installed."; exit 1; }
@@ -55,7 +55,7 @@ fi
 # check running vpn
 if pidof openvpn > /dev/null 2>&1; then
     echo "WARNING: found running openvpn process"
-    current_state="$(curl -s https://api.nordvpn.com/vpn/check/full)"
+    current_state="$(curl --location --silent https://api.nordvpn.com/vpn/check/full)"
     if [[ $( echo "$current_state" | jq -r '.["status"]' ) = "Protected" ]] ; then
         current_host_ip=$( echo "$current_state" | jq -r '.["ip"]' )
         current_host_country=$( echo "$current_state" | jq -r '.["country"]' )
@@ -68,7 +68,7 @@ host_name=''
 ovpn_zip='/tmp/nordvpn-ovpn.zip'
 # download server list
 if [ ! -f "$ovpn_zip" ]; then
-    wget 'https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip' -O "$ovpn_zip"
+    curl --location 'https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip' --output "$ovpn_zip"
 fi
 
 if [ -z $2 ]; then
@@ -76,7 +76,7 @@ if [ -z $2 ]; then
     country="${1:-NL}"
     countries='/tmp/nordvpn-countries.json'
     if [ ! -f "$countries" ]; then
-        wget 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_countries' -O "$countries"
+        curl --location 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_countries' --output "$countries"
     fi
     country_code=$(cat $countries | jq '.[]  | select(.code == "'${country^^}'") | .id')
     if [ -z "$country_code" ]; then
@@ -88,7 +88,7 @@ if [ -z $2 ]; then
 
     # choose best server
     trecomendations=$(mktemp)
-    wget --quiet --header 'cache-control: no-cache' --output-document=$trecomendations 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&filters={%22country_id%22:'$country_code'}'
+    curl --silent --header 'cache-control: no-cache' --output "$trecomendations" 'https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&filters={%22country_id%22:'$country_code'}'
     host_name="$(jq -r '.[0].hostname' $trecomendations)"
     host_description="$(jq -r '.[0].name' $trecomendations)"
     host_load="$(jq -r '.[0].load' $trecomendations)"

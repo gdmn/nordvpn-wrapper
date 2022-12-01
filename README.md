@@ -32,7 +32,7 @@ First line is user name, second is password.
 ## Dependency list
 
 - wc
-- wget
+- curl
 - unzip
 - jq
 - sudo

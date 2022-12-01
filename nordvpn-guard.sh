@@ -11,7 +11,7 @@ fi
 command -v screen >/dev/null 2>&1 || { echo >&2 "screen is not installed."; exit 1; }
 command -v dig >/dev/null 2>&1 || { echo >&2 "dig (dnsutils) is not installed."; exit 1; }
 command -v wc >/dev/null 2>&1  || { echo >&2 "wc is not installed."; exit 1; }
-command -v wget >/dev/null 2>&1  || { echo >&2 "wget is not installed."; exit 1; }
+command -v curl >/dev/null 2>&1  || { echo >&2 "curl is not installed."; exit 1; }
 command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip is not installed."; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo >&2 "jq is not installed."; exit 1; }
 command -v openvpn >/dev/null 2>&1 || { echo >&2 "openvpn is not installed."; exit 1; }
